@@ -294,8 +294,6 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
                         jo.put("pageNo", "1");
                         jo.put("pageNo", "20");
                         jo.put("jdOrderIdIndex", "");
-                        JSONArray json = new JSONArray();
-                        json.put(jo);
                         stringBuffer.append(jo.toString());
                         stringBuffer.append("ac063f15ccff416b9a2278318920926f");
                         String md5 = Md5Utils.string2MD5(stringBuffer.toString());
@@ -305,103 +303,56 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
 
 
                         String jsonobj = NumberArithmeticUtils.sendPost(url, paramMap, "utf-8", "application/json", jo.toString());
-                        syn_storedata_logger.info("调用携程酒店查询订单明细接口完成，获取信息：" + jsonobj);
+                        syn_storedata_logger.info("调用京东查询订单明细接口完成，获取信息：" + jsonobj);
 
-                        if("调用携程订单明细接口错误".equals(jsonobj))
+                        if("调用京东订单明细接口错误".equals(jsonobj))
                         {
-                            syn_storedata_logger.info("调用携程酒店查询订单明细接口错误，错误信息：" + jsonobj);
+                            syn_storedata_logger.info("调用京东查询订单明细接口错误，错误信息：" + jsonobj);
                         }
                         else
                         {
                             JSONObject jsonObject = new JSONObject(jsonobj);
-                            JSONObject status = jsonObject.getJSONObject("Status");
-                            if ("false".equals(status.getString("Success")))
+                            String success = jsonObject.getString("success");
+                            if ("false".equals(success))
                             {
-                                syn_storedata_logger.info("调用欧飞查询订单明细接口错误，错误信息：" + status.getString("Message") + status.getString("ErrorCode"));
+                                syn_storedata_logger.info("调用京东查询订单明细接口错误，错误信息：" + jsonObject.getString("resultMessage") + jsonObject.getString("resultCode"));
                                 num--;
                                 getStoreOrders(syn_storedata_logger, num);
                             }
                             else
                             {
-                                if("1".equals(productType))
+                                JSONObject result = jsonObject.getJSONObject("result");
+                                JSONArray orders = result.getJSONArray("orders");
+
+                                for (int j = 0; j < orders.length(); j++)
                                 {
-                                    JSONArray flightOrderAccountSettlementList = jsonObject.getJSONArray("FlightOrderAccountSettlementList");
-                                    for (int j = 0; j < flightOrderAccountSettlementList.length(); j++)
+                                    JSONObject order = orders.getJSONObject(j);
+                                    String jdOrderId = order.getString("jdOrderId");
+                                    String amount = order.getString("orderPrice");
+                                    String state = order.getString("state");
+                                    String time1 = order.getString("time");
+                                    Date utilDate = sdf1.parse(time1);
+                                    Date date1 = new java.sql.Date(utilDate.getTime());
+
+                                    StoreOrders storeOrders = new StoreOrders();
+                                    storeOrders.setOrderid(jdOrderId);
+                                    storeOrders.setOrdermoney(new BigDecimal(amount));
+                                    storeOrders.setSupplierid("102");
+                                    storeOrders.setSuppliername("京东订单");
+                                    storeOrders.setStatus(state);
+                                    storeOrders.setDate(date1);
+                                    storeOrders.setCommitdate(new Date());
+                                    StoreOrders ifnull = storeOrdersMapper.selectByPrimaryKey(jdOrderId);
+                                    if(ifnull == null)
                                     {
-                                        JSONArray orderSettlementList = flightOrderAccountSettlementList.getJSONObject(j).getJSONArray("OrderSettlementList");
-                                        for (int k = 0; k < orderSettlementList.length(); k++)
-                                        {
-                                            JSONObject orderSettlementBaseInfo = orderSettlementList.getJSONObject(k).getJSONObject("OrderSettlementBaseInfo");
-                                            String orderID = orderSettlementBaseInfo.getString("OrderID");
-
-                                            double amount = orderSettlementBaseInfo.getDouble("Amount");
-
-                                            String createtime = orderSettlementBaseInfo.getString("CreateTime");
-
-                                            Date utilDate = sdf1.parse(createtime);
-                                            Date date1 = new java.sql.Date(utilDate.getTime());
-
-                                            StoreOrders storeOrders = new StoreOrders();
-                                            storeOrders.setOrderid(orderID);
-                                            storeOrders.setOrdermoney(new BigDecimal(amount));
-                                            storeOrders.setSupplierid("106");
-                                            storeOrders.setSuppliername("携程订单");
-                                            storeOrders.setStatus("1");
-                                            storeOrders.setDate(date1);
-                                            storeOrders.setCommitdate(new Date());
-                                            StoreOrders ifnull = storeOrdersMapper.selectByPrimaryKey(orderID);
-                                            if(ifnull == null)
-                                            {
-                                                storeOrdersMapper.insertSelective(storeOrders);
-                                            }
-                                            else
-                                            {
-                                                storeOrdersMapper.updateByPrimaryKeySelective(storeOrders);
-                                            }
-                                        }
+                                        storeOrdersMapper.insertSelective(storeOrders);
+                                    }
+                                    else
+                                    {
+                                        storeOrdersMapper.updateByPrimaryKeySelective(storeOrders);
                                     }
                                 }
-                                if("2".equals(productType))
-                                {
-                                    JSONArray lstHtlSettlement = jsonObject.getJSONArray("LstHtlSettlement");
-                                    for (int j = 0; j < lstHtlSettlement.length(); j++)
-                                    {
-                                        JSONArray lstHotelSettlementDetail = lstHtlSettlement.getJSONObject(j).getJSONArray("LstHotelSettlementDetail");
-                                        for (int k = 0; k < lstHotelSettlementDetail.length(); k++)
-                                        {
-                                            JSONObject settlementDetail = lstHotelSettlementDetail.getJSONObject(k).getJSONObject("SettlementDetail");
-                                            String orderID = settlementDetail.getString("OrderID");
 
-                                            double amount = settlementDetail.getDouble("Amount");
-                                            double servicefee = settlementDetail.getDouble("Servicefee");
-                                            double extraCharge = settlementDetail.getDouble("ExtraCharge");
-                                            double orderMoney = BigDecimalUtils.formatBigDecimalToDouble(amount + servicefee + extraCharge);
-
-                                            String createtime = settlementDetail.getString("Createtime");
-
-                                            Date utilDate = sdf1.parse(createtime);
-                                            Date date1 = new java.sql.Date(utilDate.getTime());
-
-                                            StoreOrders storeOrders = new StoreOrders();
-                                            storeOrders.setOrderid(orderID);
-                                            storeOrders.setOrdermoney(new BigDecimal(orderMoney));
-                                            storeOrders.setSupplierid("106");
-                                            storeOrders.setSuppliername("携程订单");
-                                            storeOrders.setStatus("1");
-                                            storeOrders.setDate(date1);
-                                            storeOrders.setCommitdate(new Date());
-                                            StoreOrders ifnull = storeOrdersMapper.selectByPrimaryKey(orderID);
-                                            if(ifnull == null)
-                                            {
-                                                storeOrdersMapper.insertSelective(storeOrders);
-                                            }
-                                            else
-                                            {
-                                                storeOrdersMapper.updateByPrimaryKeySelective(storeOrders);
-                                            }
-                                        }
-                                    }
-                                }
                             }
                         }
                     }

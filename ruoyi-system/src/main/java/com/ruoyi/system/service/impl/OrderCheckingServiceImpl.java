@@ -182,10 +182,6 @@ public class OrderCheckingServiceImpl implements IOrderCheckingService
             {
                 continue;
             }
-            else
-            {
-                shop_name = "欧飞";
-            }
 
             //插入供应商恒等式记录表
             CheckingStore checkingStore = new CheckingStore();

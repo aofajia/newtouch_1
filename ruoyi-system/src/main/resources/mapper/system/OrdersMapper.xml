@@ -896,8 +896,12 @@
     case tn when 't1' then tbl.`status` else '' end as `status`, case tn when 't2' then tbl.`status` else '' end as other_status,
         tn,tbl.store_id,tbl.createtime,tbl.goods_id as type
     FROM (
-        SELECT bo.order_id as orderid, bo.payed as ordermoney,'t1' as tn, bo.store_id,bo.createtime,bo.`status`,oi.goods_id
-    <!--FROM hrfi_sdb_b2c_orders-->
+        <if test="id != '102'" >
+          SELECT bo.order_id as orderid, bo.payed as ordermoney,'t1' as tn, bo.store_id,bo.createtime,bo.`status`,oi.goods_id
+        </if>
+        <if test="id == '102'" >
+          SELECT bo.jdorderno as orderid, bo.payed as ordermoney,'t1' as tn, bo.store_id,bo.createtime,bo.`status`,oi.goods_id
+        </if>
         FROM sdb_b2c_orders bo
         LEFT JOIN sdb_b2c_order_items oi on oi.order_id = bo.order_id
         WHERE 1 = 1
@@ -909,14 +913,14 @@
         </if>
     <!--AND FROM_UNIXTIME(bo.createtime, '%Y-%m-%d') >='2018-11-30'-->
       AND bo.disabled ='false'
-    <!-- AND bo.pay_status &lt;&gt; '0'-->
+      AND bo.pay_status &lt;&gt; '0'
       AND bo.order_id not in
       (
           SELECT ho.order_id FROM hrfi_openticket ho
           WHERE ho.checkingstatus = '0'
           AND FROM_UNIXTIME(ho.createtime, '%Y-%m-%d') &lt;= #{before6Time}
       )
-    <!-- AND FROM_UNIXTIME(bo.createtime, '%Y-%m-%d') &lt;= #{startTime}-->
+     AND FROM_UNIXTIME(bo.createtime, '%Y-%m-%d') &lt;= #{startTime}
 
     UNION ALL
 
@@ -930,23 +934,23 @@
         AND FROM_UNIXTIME(ho.createtime, '%Y-%m-%d') &lt;= #{before6Time}
     )
     AND DATE_FORMAT(date,'%Y-%m-%d') &lt;= #{startTime}
-) tbl
-INNER JOIN hrfi_balancewarning_config bc on bc.supplierid = #{id}
-<if test="samelist != null" >
-  INNER JOIN sdb_b2c_orders bo on bo.order_id = tbl.orderid
-</if>
-<if test="orderid != null and ordermoney != null">
-  GROUP BY orderid, ordermoney
-</if>
-<if test="orderid != null and ordermoney == null">
-  GROUP BY orderid
-</if>
-HAVING count(*) = #{intcount}
-<if test="differ == null">
-  ORDER BY order_id DESC, other_order_id DESC
-</if>
-<if test="differ != null">
-  ORDER BY other_order_id DESC,order_id DESC
-</if>
+    ) tbl
+    INNER JOIN hrfi_balancewarning_config bc on bc.supplierid = #{id}
+    <if test="samelist != null" >
+      INNER JOIN sdb_b2c_orders bo on bo.order_id = tbl.orderid
+    </if>
+    <if test="orderid != null and ordermoney != null">
+      GROUP BY orderid, ordermoney
+    </if>
+    <if test="orderid != null and ordermoney == null">
+      GROUP BY orderid
+    </if>
+    HAVING count(*) = #{intcount}
+    <if test="differ == null">
+      ORDER BY order_id DESC, other_order_id DESC
+    </if>
+    <if test="differ != null">
+      ORDER BY other_order_id DESC,order_id DESC
+    </if>
 </select>
 </mapper>

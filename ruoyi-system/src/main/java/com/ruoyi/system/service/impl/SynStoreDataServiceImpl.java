@@ -236,6 +236,51 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
                 else if("102".equals("store_id"))
                 {
                     //京东
+                    balanceRecord.setSupplierid(store_id);
+                    balanceRecord.setSuppliername("京东");
+                    balanceRecord.setDate(startTime);
+                    balanceRecord.setCommitdate(new Date());
+
+                    String url = "http://xxxxxx";
+
+                    Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
+                    StringBuffer stringBuffer = new StringBuffer();
+                    long time = System.currentTimeMillis();
+                    stringBuffer.append(time);
+                    JSONObject jo = new JSONObject();
+                    jo.put("appId", "newtouchmall");
+                    jo.put("payType", "4");
+                    stringBuffer.append(jo.toString());
+                    stringBuffer.append("ac063f15ccff416b9a2278318920926f");
+                    String md5 = Md5Utils.string2MD5(stringBuffer.toString());
+                    paramMap.put("appId","newtouchmall");
+                    paramMap.put("timestamp",time);
+                    paramMap.put("sign",md5.toUpperCase());
+                    try
+                    {
+                        String jsonobj = NumberArithmeticUtils.sendPost(url,paramMap, "utf-8", "application/json",jo.toString());
+                        JSONObject jsonObject = new JSONObject(jsonobj);
+
+                        if("true".equals(jsonObject.getString("success")))
+                        {
+                            String totalBalance = jsonObject.getString("result");
+                            BigDecimal balancemoney = new BigDecimal(totalBalance);
+
+                            syn_storedata_logger.info("供应商："+shop_name+"获取余额值为："+balancemoney);
+
+                            balanceRecord.setBalancemoney(balancemoney);
+                            balanceRecordMapper.insertSelective(balanceRecord);
+                        }
+                        else
+                        {
+                            syn_storedata_logger.info("供应商："+shop_name+"获取余额失败，报错原因："+jsonObject.getString("resultMessage")+jsonObject.getString("resultCode"));
+                        }
+                    }
+                    catch (IOException e)
+                    {
+                        syn_storedata_logger.info("供应商："+shop_name+"获取余额失败，报错原因："+e.toString());
+                        e.printStackTrace();
+                    }
                 }
             }
         }
@@ -263,7 +308,8 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
         List<StoreConfig> storeConfigs = bwConfigMapper.selectStoreConfigAll();
         for (int i = 0; i < storeConfigs.size(); i++)
         {
-            if(num > 0) {
+             if(num > 0)
+            {
                 StoreConfig storeConfig = storeConfigs.get(i);
                 String store_id = storeConfig.getStore_id();
                 String shop_name = storeConfig.getShop_name();
@@ -275,34 +321,15 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
                     String url = "http://third-party.newtouch.com/jdmp/ntpmp-api/query-order";
 
                     List<String> productTypeList = new ArrayList<String>();
-                    productTypeList.add("1");
-                    productTypeList.add("2");
-                    productTypeList.add("3");
+                    productTypeList.add("1"); //已和京东确认 状态为1 是所有订单
+//                    productTypeList.add("2");
+//                    productTypeList.add("3");
 
                     for (int l = 0; l < productTypeList.size(); l++)
                     {
                         String productType = productTypeList.get(l);
+                        String jsonobj = getJdOrders(url, startTime, productType,"");
 
-                        Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
-                        StringBuffer stringBuffer = new StringBuffer();
-                        long time = System.currentTimeMillis();
-                        stringBuffer.append(time);
-                        JSONObject jo = new JSONObject();
-                        jo.put("appId", "newtouchmall");
-                        jo.put("date", startTime);
-                        jo.put("searchType", productType);
-                        jo.put("pageNo", "1");
-                        jo.put("pageNo", "20");
-                        jo.put("jdOrderIdIndex", "");
-                        stringBuffer.append(jo.toString());
-                        stringBuffer.append("ac063f15ccff416b9a2278318920926f");
-                        String md5 = Md5Utils.string2MD5(stringBuffer.toString());
-                        paramMap.put("appId", "newtouchmall");
-                        paramMap.put("timestamp", time);
-                        paramMap.put("sign", md5.toUpperCase());
-
-
-                        String jsonobj = NumberArithmeticUtils.sendPost(url, paramMap, "utf-8", "application/json", jo.toString());
                         syn_storedata_logger.info("调用京东查询订单明细接口完成，获取信息：" + jsonobj);
 
                         if("调用京东订单明细接口错误".equals(jsonobj))
@@ -315,14 +342,36 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
                             String success = jsonObject.getString("success");
                             if ("false".equals(success))
                             {
-                                syn_storedata_logger.info("调用京东查询订单明细接口错误，错误信息：" + jsonObject.getString("resultMessage") + jsonObject.getString("resultCode"));
+                                syn_storedata_logger.info("调用京东查询订单明细接口错误，错误信息：" + jsonObject.getString("resultMessage"));
                                 num--;
                                 getStoreOrders(syn_storedata_logger, num);
                             }
                             else
                             {
                                 JSONObject result = jsonObject.getJSONObject("result");
+                                int total = result.getInt("total");
                                 JSONArray orders = result.getJSONArray("orders");
+
+                                if(total > 100)
+                                {
+                                    //获取最小订单ID 重新获取
+                                    String minOrderId = getMinOrderId(orders);
+
+                                    String jsonobjs = getJdOrders(url, startTime, productType,minOrderId);
+                                    JSONObject alljsonObject = new JSONObject(jsonobjs);
+                                    String successfalg = alljsonObject.getString("success");
+                                    if ("false".equals(successfalg))
+                                    {
+                                        syn_storedata_logger.info("调用京东查询订单明细接口错误，错误信息：" + jsonObject.getString("resultMessage"));
+                                    }
+                                    else
+                                    {
+                                        JSONObject results = jsonObject.getJSONObject("result");
+                                        orders = new JSONArray();
+                                        orders = result.getJSONArray("orders");
+                                    }
+                                }
+
 
                                 for (int j = 0; j < orders.length(); j++)
                                 {
@@ -446,7 +495,7 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
                         JSONObject jo = new JSONObject();
                         jo.put("appId", "newtouchmall");
                         jo.put("dateFrom", "2018-12-01");
-                        jo.put("dateTo", "2018-12-11");
+                        jo.put("dateTo", "2018-12-14");
                         jo.put("productType", productType);
                         JSONArray json = new JSONArray();
                         json.put(jo);
@@ -563,5 +612,54 @@ public class SynStoreDataServiceImpl implements ISynStoreDataService
             }
         }
         syn_storedata_logger.info(sdf1.format(new Date()) + "供应商订单同步功能获取结束，对账截至日期为：" + startTime);
+    }
+
+    public String getJdOrders(String url,String startTime,String productType,String jdOrderIdIndex)  throws Exception
+    {
+        Map<String, Object> paramMap = new LinkedHashMap<String, Object>();
+        StringBuffer stringBuffer = new StringBuffer();
+        long time = System.currentTimeMillis();
+        stringBuffer.append(time);
+        JSONObject jo = new JSONObject();
+        jo.put("appId", "newtouchmall");
+        jo.put("date", startTime);
+        jo.put("searchType", productType);
+        jo.put("pageNo", "1");
+        jo.put("pageNo", "100");
+        jo.put("jdOrderIdIndex", jdOrderIdIndex);
+        stringBuffer.append(jo.toString());
+        stringBuffer.append("ac063f15ccff416b9a2278318920926f");
+        String md5 = Md5Utils.string2MD5(stringBuffer.toString());
+        paramMap.put("appId", "newtouchmall");
+        paramMap.put("timestamp", time);
+        paramMap.put("sign", md5.toUpperCase());
+
+
+        String jsonobj = NumberArithmeticUtils.sendPost(url, paramMap, "utf-8", "application/json", jo.toString());
+        return jsonobj;
+    }
+
+    public String getMinOrderId(JSONArray orders) throws Exception
+    {
+        String minOrderId = "";
+        long min = 0l;
+
+        for (int j = 0; j < orders.length(); j++)
+        {
+            JSONObject order = orders.getJSONObject(j);
+            String jdOrderId = order.getString("jdOrderId");
+            String time = order.getString("time");
+            SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            Date ordertime = df.parse(time);
+            long timel = ordertime.getTime();
+            if(timel < min)
+            {
+                min = timel;
+                minOrderId = jdOrderId;
+            }
+        }
+
+
+        return minOrderId;
     }
 }

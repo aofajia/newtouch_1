@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.quartz.mapper.WarnQuartzMapper">
+
+    <resultMap id="SupplierMap" type="com.ruoyi.quartz.domain.BwConfigQuartz">
+        <id column="id" property="id" jdbcType="VARCHAR" />
+        <result column="configtype" property="configtype" jdbcType="VARCHAR" />
+        <result column="configname" property="configname" jdbcType="VARCHAR" />
+        <result column="supplierid" property="supplierid" jdbcType="VARCHAR" />
+        <result column="paymethod" property="paymethod" jdbcType="VARCHAR" />
+        <result column="warningmoney" property="warningmoney" jdbcType="DECIMAL" />
+        <result column="monthlymoney" property="monthlymoney" jdbcType="DECIMAL" />
+        <result column="storeaccount" property="storeaccount" jdbcType="VARCHAR" />
+        <result column="invoicetype" property="invoicetype" jdbcType="VARCHAR" />
+        <result column="contacts" property="contacts" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="storebalanceurl" property="storebalanceurl" jdbcType="VARCHAR" />
+        <result column="startdate" property="startdate" jdbcType="VARCHAR" />
+        <result column="enddate" property="enddate" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <select id="findCount" resultType="java.lang.Integer">
+        select  count(*) from hrfi_balancewarning_config bw
+        where  bw.configtype='0001' and bw.status='1';
+    </select>
+
+    <select id="findAllSupplier" resultMap="SupplierMap">
+        select bw.supplierid,bw.configname,warningmoney from hrfi_balancewarning_config bw
+        where  bw.configtype='0001' and bw.status='1' and bw.paymethod='precharge';
+    </select>
+
+    <select id="countMoney" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select count(t.balancemoney) from hrfi_balancerecord t
+        where supplierid=#{supplierid,jdbcType=VARCHAR} order by commitdate desc;
+    </select>
+
+    <select id="findMoney" parameterType="java.lang.String" resultType="java.util.List">
+        select t.balancemoney from hrfi_balancerecord t
+        where supplierid=#{supplierid,jdbcType=VARCHAR} order by commitdate desc;
+    </select>
+
+</mapper>

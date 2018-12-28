@@ -43,6 +43,7 @@
 		<module>ruoyi-framework</module>
 		<module>ruoyi-system</module>
 		<module>ruoyi-quartz</module>
+		<module>ruoyi-mailservice</module>
 		<module>ruoyi-generator</module>
         <module>ruoyi-common</module>
     </modules>
@@ -74,8 +75,9 @@
 		    <groupId>javax.servlet</groupId>
 		    <artifactId>javax.servlet-api</artifactId>
 		</dependency>
-		
-		<!-- 日志工具类 -->
+
+
+        <!-- 日志工具类 -->
 		<dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>

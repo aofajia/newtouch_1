@@ -1,0 +1,164 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.WarnMailMapper" >
+  <resultMap id="BaseResultMap" type="com.ruoyi.system.domain.WarnMail" >
+    <id column="mail_Id" property="mailId" jdbcType="INTEGER" />
+    <result column="service_id" property="serviceId" jdbcType="INTEGER" />
+    <result column="from_mail" property="fromMail" jdbcType="VARCHAR" />
+    <result column="to_account" property="toAccount" jdbcType="VARCHAR" />
+    <result column="subject" property="subject" jdbcType="VARCHAR" />
+    <result column="content1" property="content1" jdbcType="VARCHAR" />
+    <result column="content2" property="content2" jdbcType="VARCHAR" />
+    <result column="content3" property="content3" jdbcType="VARCHAR" />
+    <result column="content4" property="content4" jdbcType="VARCHAR" />
+    <result column="send_time" property="sendTime" jdbcType="TIMESTAMP" />
+    <result column="bz" property="bz" jdbcType="VARCHAR" />
+  </resultMap>
+  <sql id="Base_Column_List" >
+    mail_Id, service_id, from_mail, to_account, subject, content1, content2, content3, 
+    content4, send_time, bz
+  </sql>
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from warn_mail
+    where mail_Id = #{mailId,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from warn_mail
+    where mail_Id = #{mailId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ruoyi.system.domain.WarnMail" >
+    insert into warn_mail (mail_Id, service_id, from_mail, 
+      to_account, subject, content1, 
+      content2, content3, content4, 
+      send_time, bz)
+    values (#{mailId,jdbcType=INTEGER}, #{serviceId,jdbcType=INTEGER}, #{fromMail,jdbcType=VARCHAR}, 
+      #{toAccount,jdbcType=VARCHAR}, #{subject,jdbcType=VARCHAR}, #{content1,jdbcType=VARCHAR}, 
+      #{content2,jdbcType=VARCHAR}, #{content3,jdbcType=VARCHAR}, #{content4,jdbcType=VARCHAR}, 
+      #{sendTime,jdbcType=TIMESTAMP}, #{bz,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.ruoyi.system.domain.WarnMail" >
+    insert into warn_mail
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="mailId != null" >
+        mail_Id,
+      </if>
+      <if test="serviceId != null" >
+        service_id,
+      </if>
+      <if test="fromMail != null" >
+        from_mail,
+      </if>
+      <if test="toAccount != null" >
+        to_account,
+      </if>
+      <if test="subject != null" >
+        subject,
+      </if>
+      <if test="content1 != null" >
+        content1,
+      </if>
+      <if test="content2 != null" >
+        content2,
+      </if>
+      <if test="content3 != null" >
+        content3,
+      </if>
+      <if test="content4 != null" >
+        content4,
+      </if>
+      <if test="sendTime != null" >
+        send_time,
+      </if>
+      <if test="bz != null" >
+        bz,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="mailId != null" >
+        #{mailId,jdbcType=INTEGER},
+      </if>
+      <if test="serviceId != null" >
+        #{serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="fromMail != null" >
+        #{fromMail,jdbcType=VARCHAR},
+      </if>
+      <if test="toAccount != null" >
+        #{toAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="subject != null" >
+        #{subject,jdbcType=VARCHAR},
+      </if>
+      <if test="content1 != null" >
+        #{content1,jdbcType=VARCHAR},
+      </if>
+      <if test="content2 != null" >
+        #{content2,jdbcType=VARCHAR},
+      </if>
+      <if test="content3 != null" >
+        #{content3,jdbcType=VARCHAR},
+      </if>
+      <if test="content4 != null" >
+        #{content4,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTime != null" >
+        #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bz != null" >
+        #{bz,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ruoyi.system.domain.WarnMail" >
+    update warn_mail
+    <set >
+      <if test="serviceId != null" >
+        service_id = #{serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="fromMail != null" >
+        from_mail = #{fromMail,jdbcType=VARCHAR},
+      </if>
+      <if test="toAccount != null" >
+        to_account = #{toAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="subject != null" >
+        subject = #{subject,jdbcType=VARCHAR},
+      </if>
+      <if test="content1 != null" >
+        content1 = #{content1,jdbcType=VARCHAR},
+      </if>
+      <if test="content2 != null" >
+        content2 = #{content2,jdbcType=VARCHAR},
+      </if>
+      <if test="content3 != null" >
+        content3 = #{content3,jdbcType=VARCHAR},
+      </if>
+      <if test="content4 != null" >
+        content4 = #{content4,jdbcType=VARCHAR},
+      </if>
+      <if test="sendTime != null" >
+        send_time = #{sendTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bz != null" >
+        bz = #{bz,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where mail_Id = #{mailId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ruoyi.system.domain.WarnMail" >
+    update warn_mail
+    set service_id = #{serviceId,jdbcType=INTEGER},
+      from_mail = #{fromMail,jdbcType=VARCHAR},
+      to_account = #{toAccount,jdbcType=VARCHAR},
+      subject = #{subject,jdbcType=VARCHAR},
+      content1 = #{content1,jdbcType=VARCHAR},
+      content2 = #{content2,jdbcType=VARCHAR},
+      content3 = #{content3,jdbcType=VARCHAR},
+      content4 = #{content4,jdbcType=VARCHAR},
+      send_time = #{sendTime,jdbcType=TIMESTAMP},
+      bz = #{bz,jdbcType=VARCHAR}
+    where mail_Id = #{mailId,jdbcType=INTEGER}
+  </update>
+</mapper>

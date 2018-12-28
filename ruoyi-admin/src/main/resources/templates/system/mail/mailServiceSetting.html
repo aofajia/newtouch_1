@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html html lang="zh" xmlns:th="http://www.thymeleaf.org"
+      xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head th:include="include :: header">
+    <meta charset="UTF-8">
+    <title>邮箱服务配置</title>
+</head>
+<body>
+<div class="container-div">
+    <div class="row">
+
+        <div class="col-sm-12 search-collapse">
+            <form class="role-form" id="form-mail-add-manage">
+                <input type="hidden" name="serviceId" id="serviceId"/>
+                <div class="select-list">
+                    <table id="botstrap-table">
+                        <thead>
+                            <td colspan="2" style="text-align: center"><h3>系统邮箱服务配置界面</h3></td>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td><span>邮箱传输协议:</span></td>
+                            <td><input type="text" id="serviceProtocl"/></td>
+                        </tr>
+                        <tr>
+                            <td><span>系统邮箱服务器地址:</span></td>
+                            <td><input type="text" id="serviceHost"/></td>
+                        </tr>
+                        <tr>
+                            <td><span>服务端口:</span></td>
+                            <td><input type="text" id="servicePort"/></td>
+                        </tr>
+                        <tr>
+                            <td><span>发件人账户:</span></td>
+                            <td><input type="text" id="fromAccount"/></td>
+                        </tr>
+                        <tr>
+                            <td><span>发件人邮箱:</span></td>
+                            <td><input type="text" id="fromMail"/></td>
+                        </tr>
+                        <tr>
+                            <td><span>授权密码:</span></td>
+                            <td><input type="text" id="authPassword"/></td>
+                        </tr>
+                        <tr>
+                            <td colspan="2" style="text-align: center;">
+                                <input type="button"  onclick="save();" value="保存"/>
+                                <input type="button"  onclick="update();" value="更新"/>
+                            </td>
+                        </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-sm-12 search-collapse">
+            <form class="role-form" id="form-mail-test-manage">
+                <div class="select-list">
+                    <table id="test-mail-table">
+                        <tbody>
+                            <tr>
+                                <td><span>收件箱:</span><input type="text" id="toMail" name="toMail"/></td>
+                                <td  style="text-align: center">
+                                    <input type="button" onclick="test();" value="测试" />
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </form>
+        </div>
+
+
+    </div>
+</div>
+<div th:include="include::footer"></div>
+<style type="text/css">
+    input{width:250px;}
+    input[button]{width:150px;}
+    td,th{padding-right: 30px;padding-bottom: 25px;}
+</style>
+<script type="text/javascript">
+
+    var prefix = ctx + "fi/mail";
+
+    $(function(){
+        //初始化加载
+       initLoad();
+    });
+
+    function initLoad(){
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : ctx + "fi/mail/init",
+            dataType : 'json',
+            // data : JSON.stringify(data),
+            data : {},
+            async : false,
+            error : function(data){
+                console.log(data);
+            },
+            success:function(data){
+                console.log(data);
+                if(data!=null){
+                    var serviceBody=data;
+                    $('#serviceId').val(serviceBody.serviceId);
+                    $('#serviceProtocl').val(serviceBody.serviceProtocl);
+                    $('#serviceHost').val(serviceBody.serviceHost);
+                    $('#servicePort').val(serviceBody.servicePort);
+                    $('#fromAccount').val(serviceBody.fromAccount);
+                    $('#fromMail').val(serviceBody.fromMail);
+                    $('#authPassword').val(serviceBody.authPassword);
+                }
+
+            }
+        });
+    }
+
+    var data=new Object();
+
+    function createData(){
+        data.serviceId=$('#serviceId').val();
+        data.serviceProtocl = $('#serviceProtocl').val();
+        data.serviceHost = $('#serviceHost').val();
+        data.servicePort = $('#servicePort').val();
+        data.fromAccount = $('#fromAccount').val();
+        data.fromMail=$('#fromMail').val();
+        data.authPassword=$('#authPassword').val();
+        data.toMail=$('#toMail').val();
+        return data;
+    }
+
+    function save(){
+        data=createData();
+        validate(data);
+    }
+
+    function validate(data){
+        if ($.validate.form())
+        {
+            submitHandler(data);
+        }
+    }
+
+    function submitHandler(data){
+        //var data=JSON.stringify(data);
+        console.log(data);
+        console.log(JSON.stringify(data));
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : ctx + "fi/mail/add",
+            // contentType: "application/json; charset=utf-8",
+            dataType : 'json',
+            data : data,
+            //data : data,
+            async : false,
+            error : function(data) {
+                $.modal.alertError("保存失败！");
+            },
+            success : function(data) {
+                if(data==1){
+                     window.location.href=prefix+"/main";
+                }
+                if(data==0){
+                    $.modal.alert("已配置，建议跟新操作",modal_status.WARNING);
+                }
+            }
+        });
+    }
+
+    function update(){
+        data=createData();
+        validation(data);
+    }
+
+    function validation(data){
+        if ($.validate.form()){
+            modify(data);
+        }
+    }
+
+    function modify(data){
+        //var data=JSON.stringify(data);
+        $.ajax({
+            cache : true,
+            type : "POST",
+            url : ctx + "fi/mail/update",
+            // contentType: "application/json; charset=utf-8",
+            dataType : 'json',
+            //data : JSON.stringify(data),
+            data : data,
+            async : false,
+            error : function(data) {
+                $.modal.alertError("更新失败");
+
+            },
+            success : function(data) {
+                if(data==1){
+                    window.location.href=prefix+"/main";
+                }
+                if(data==0){
+                    $.modal.alert("没有配置,建议保存操作",modal_status.WARNING);
+                }
+            }
+        });
+
+    }
+
+    function test(){
+        var testData=createData();
+        $.ajax({
+            cache:true,
+            type : "POST",
+            url : ctx + "fi/mail/testToMail",
+            //contentType: "application/json; charset=utf-8",
+            dataType : 'json',
+            //data : JSON.stringify(data),
+            data : testData,
+            async : false,
+            success:function() {
+                $.modal.alert("success");
+            },
+            error:function () {
+                $.modal.alert("error")
+            }
+
+        });
+    }
+
+</script>
+</body>
+
+</html>

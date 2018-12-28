@@ -91,7 +91,7 @@
     function load(){
         $.ajax({
             type: "POST",
-            url: projectName+"/fi/balancewarning/getSupplierInfo",
+            url: prefix+"/getSupplierInfo",
             data: "",
             success: function(data){
                var data=data;
@@ -101,6 +101,7 @@
                    tbody.append("<tr></tr>");
                    var checkboxNode="<td id='checkbox'><input type=\"checkbox\"/></td>";
                    $("#form-tbody tr:eq("+i+")").append(checkboxNode);
+                   myArray[i].supplierid=data[i].storeId;
                    myArray[i].configname=data[i].shopName;
                    var shopNameNode="<td id='shopName' style='width:20px;text-align: center;'>"+myArray[i].configname+"</td>";
                    $("#form-tbody tr:eq("+i+")").append(shopNameNode);
@@ -178,14 +179,14 @@
 
                 $.ajax({
                     type: "POST",
-                    url: projectName+"/fi/balancewarning/saveSupplier",
+                    url: prefix+"/saveSupplier",
                     data: myArray[i],
                     //async : false,
                     success: function(data){
 
                       console.log("配置成功!")
 
-                      window.location.href=projectName+"/fi/balancewarning/home";
+                      window.location.href=prefix+"/home";
                     },
                     error:function () {
                         alert("配置失败","fail")

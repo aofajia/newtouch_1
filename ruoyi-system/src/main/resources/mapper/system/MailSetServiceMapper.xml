@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.ruoyi.system.mapper.MailSetServiceMapper" >
+  <resultMap id="BaseResultMap" type="com.ruoyi.system.domain.MailSetService" >
+    <id column="service_id" property="serviceId" jdbcType="INTEGER" />
+    <result column="service_protocl" property="serviceProtocl" jdbcType="VARCHAR" />
+    <result column="service_host" property="serviceHost" jdbcType="VARCHAR" />
+    <result column="service_port" property="servicePort" jdbcType="VARCHAR" />
+    <result column="from_account" property="fromAccount" jdbcType="VARCHAR" />
+    <result column="from_mail" property="fromMail" jdbcType="VARCHAR" />
+    <result column="auth_password" property="authPassword" jdbcType="VARCHAR" />
+    <result column="creat_time" property="creatTime" jdbcType="TIMESTAMP" />
+    <result column="bz" property="bz" jdbcType="VARCHAR" />
+    <result column="to_mail" property="toMail" jdbcType="VARCHAR"/>
+  </resultMap>
+  <sql id="Base_Column_List" >
+    service_id, service_protocl, service_host, service_port, from_account, from_mail, 
+    auth_password, creat_time, bz,to_mail
+  </sql>
+  <select id="selectByMailId" parameterType="java.lang.Integer" resultType="java.lang.Integer">
+    select count(*)
+    from mail_set_service
+    where  service_id=#{serviceId,jdbcType=INTEGER}
+
+  </select>
+  <select id="selectAll" resultType="java.lang.Integer">
+    select count(*) from mail_set_service
+  </select>
+
+  <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
+    select 
+    <include refid="Base_Column_List" />
+    from mail_set_service
+    where service_id = #{serviceId,jdbcType=INTEGER}
+  </select>
+
+  <select id="find" resultMap="BaseResultMap">
+    select
+      <include refid="Base_Column_List" />
+    from mail_set_service order by service_id desc
+  </select>
+
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
+    delete from mail_set_service
+    where service_id = #{serviceId,jdbcType=INTEGER}
+  </delete>
+  <insert id="insert" parameterType="com.ruoyi.system.domain.MailSetService" >
+    insert into mail_set_service (service_id, service_protocl, service_host, 
+      service_port, from_account, from_mail, 
+      auth_password, creat_time, bz,to_mail
+      )
+    values (#{serviceId,jdbcType=INTEGER}, #{serviceProtocl,jdbcType=VARCHAR}, #{serviceHost,jdbcType=VARCHAR}, 
+      #{servicePort,jdbcType=VARCHAR}, #{fromAccount,jdbcType=VARCHAR}, #{fromMail,jdbcType=VARCHAR}, 
+      #{authPassword,jdbcType=VARCHAR}, #{creatTime,jdbcType=TIMESTAMP}, #{bz,jdbcType=VARCHAR,},
+      #{toMail,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.ruoyi.system.domain.MailSetService" >
+    insert into mail_set_service
+    <trim prefix="(" suffix=")" suffixOverrides="," >
+      <if test="serviceId != null" >
+        service_id,
+      </if>
+      <if test="serviceProtocl != null" >
+        service_protocl,
+      </if>
+      <if test="serviceHost != null" >
+        service_host,
+      </if>
+      <if test="servicePort != null" >
+        service_port,
+      </if>
+      <if test="fromAccount != null" >
+        from_account,
+      </if>
+      <if test="fromMail != null" >
+        from_mail,
+      </if>
+      <if test="authPassword != null" >
+        auth_password,
+      </if>
+      <if test="creatTime != null" >
+        creat_time,
+      </if>
+      <if test="bz != null" >
+        bz,
+      </if>
+      <if test="toMail!=null">
+        to_mail,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides="," >
+      <if test="serviceId != null" >
+        #{serviceId,jdbcType=INTEGER},
+      </if>
+      <if test="serviceProtocl != null" >
+        #{serviceProtocl,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceHost != null" >
+        #{serviceHost,jdbcType=VARCHAR},
+      </if>
+      <if test="servicePort != null" >
+        #{servicePort,jdbcType=VARCHAR},
+      </if>
+      <if test="fromAccount != null" >
+        #{fromAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="fromMail != null" >
+        #{fromMail,jdbcType=VARCHAR},
+      </if>
+      <if test="authPassword != null" >
+        #{authPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="creatTime != null" >
+        #{creatTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bz != null" >
+        #{bz,jdbcType=VARCHAR},
+      </if>
+      <if test="to_mail!=null">
+        #{to_mail,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <update id="updateByPrimaryKeySelective" parameterType="com.ruoyi.system.domain.MailSetService" >
+    update mail_set_service
+    <set >
+      <if test="serviceProtocl != null" >
+        service_protocl = #{serviceProtocl,jdbcType=VARCHAR},
+      </if>
+      <if test="serviceHost != null" >
+        service_host = #{serviceHost,jdbcType=VARCHAR},
+      </if>
+      <if test="servicePort != null" >
+        service_port = #{servicePort,jdbcType=VARCHAR},
+      </if>
+      <if test="fromAccount != null" >
+        from_account = #{fromAccount,jdbcType=VARCHAR},
+      </if>
+      <if test="fromMail != null" >
+        from_mail = #{fromMail,jdbcType=VARCHAR},
+      </if>
+      <if test="authPassword != null" >
+        auth_password = #{authPassword,jdbcType=VARCHAR},
+      </if>
+      <if test="creatTime != null" >
+        creat_time = #{creatTime,jdbcType=TIMESTAMP},
+      </if>
+      <if test="bz != null" >
+        bz = #{bz,jdbcType=VARCHAR},
+      </if>
+      <if test="toMail!=null">
+        to_mail=#{toMail,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where service_id = #{serviceId,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.ruoyi.system.domain.MailSetService" >
+    update mail_set_service
+    set service_protocl = #{serviceProtocl,jdbcType=VARCHAR},
+      service_host = #{serviceHost,jdbcType=VARCHAR},
+      service_port = #{servicePort,jdbcType=VARCHAR},
+      from_account = #{fromAccount,jdbcType=VARCHAR},
+      from_mail = #{fromMail,jdbcType=VARCHAR},
+      auth_password = #{authPassword,jdbcType=VARCHAR},
+      creat_time = #{creatTime,jdbcType=TIMESTAMP},
+      bz = #{bz,jdbcType=VARCHAR},
+      to_mail=#{toMail,jdbcType=VARCHAR},
+    where service_id = #{serviceId,jdbcType=INTEGER}
+  </update>
+</mapper>
